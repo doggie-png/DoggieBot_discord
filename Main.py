@@ -249,13 +249,15 @@ async def PlaySong(interaction: discord.Interaction, cancion: str):
 
 
 #Rocola con diferentes generos musicales
-@client.tree.command(name="rocola", description="Selecciona un genero y disfruta la playlist",guild=GUILD_ID)
+@client.tree.command(name="rocola", description="Selecciona si quieres modo playlist o modo dj-set",guild=GUILD_ID)
 async def Rocola(interaction: discord.Interaction):
     embed = discord.Embed(title="Rocola", color = discord.Color.red())
     embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-    embed.add_field(name ="Selecciona un genero para comenzar a escuchar", value="Solo seleccionas y en automatico se reproduce una playlist de ese genero.", inline = False)
-    embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minutos")
-    await interaction.response.send_message(embed=embed, view=View(), delete_after= 60)
+    embed.add_field(name ="Selecciona el modo de la rocola", value="", inline = False) #modo dj-set incluir en el embed de repruccion, el nombre del canal del dj
+    embed.add_field(name="Platlist:", value="Reproduce canciones de ese genero.")
+    embed.add_field(name="Dj-set:", value="Reproduce un set de algun dj del genero que tu quieras")
+    #embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minutos")
+    await interaction.response.send_message(embed=embed, view=BotonesModoRocola(), delete_after= 60) #view=View() es de los botones de los generos para el modo playlist  delete_after= 60
     
 
 #AgregaAPlaylist
@@ -356,8 +358,8 @@ async def dropdownMenu(interaction: discord.Interaction):
     embed = discord.Embed(title="DropDown Menu", color = discord.Color.red())
     embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
     embed.add_field(name ="Prueba de dropdown menu", value="selecciona una opcion", inline = False)
-    embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minuto")
-    await interaction.response.send_message(embed=embed,view = MenuView(), delete_after = 60)
+    embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minuto o menos")
+    await interaction.response.send_message(embed=embed, delete_after = 30)
 
 
 #Eliminar mensajes
@@ -370,9 +372,9 @@ async def limpiar_mensajes_bots(interaction: discord.Interaction, limite: int):
     #)
 
     async for message in interaction.channel.history(limit=limite):
-        await message.delete()
-        #if message.author.bot:
-            #await message.delete()
+        #await message.delete()
+        if message.author.bot:
+            await message.delete()
 
 
 #VISTAS DE BOTONES
@@ -489,54 +491,160 @@ class View(discord.ui.View):
 
 
 #vista libre para usar
-class Agregar(discord.ui.View):
-    @discord.ui.button(label="Techno", style=discord.ButtonStyle.red)
-    async def button_Techno(self, button,interaction):
-        await button.response.send_message("se comenzo la reproduccion xd")
+class BotonesModoRocola(discord.ui.View):
+    @discord.ui.button(label="Playlist", style=discord.ButtonStyle.red)
+    async def button_Playlist(self, button,interaction):
+        
+        embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
+        embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
+        embed.add_field(name="Selecciona un Genero", value="")
+        await button.response.send_message(embed=embed ,view=ViewGeneros())
 
-    @discord.ui.button(label="Techno", style=discord.ButtonStyle.red)
-    async def button_Techno(self, button,interaction):
+
+    @discord.ui.button(label="DJ-SET", style=discord.ButtonStyle.red)
+    async def button_DJSet(self, button,interaction):
         await button.response.send_message("se comenzo la reproduccion xd")
 
 
 #VISTAS PARA DROPDOWN MENU
 
-#MAQUETA DE VISTA FROP DOWN MENU
-class Menu(discord.ui.Select):
+#MAQUETA DE VISTA DROP DOWN MENU
+class MenuTechno(discord.ui.Select):
     def __init__(self):
         options = [
+            #aqui se deberia llenar con la informacion de los json, se deberia extraer de ellos el genero de cada playlist
             discord.SelectOption(
-                label="Opcion 1",
-                description="Soy la opcion 1 que esperabas"
+                label="Hard Techno"
+                #description="Hard Techno"
             ),
             discord.SelectOption(
-                label="Opcion 2",
-                description="no hace falta que te diga"
+                label="Acid Techno",
+                
             ),
             discord.SelectOption(
-                label="Opcion 3",
-                description="llegaste al final, date un bongazo"
+                label="Melodic Techno"
+                
+            ),
+            discord.SelectOption(
+                label="Early Techno"
+                
             )
         ]
 
-        super().__init__(placeholder="Selecciona una opcion", min_values=1,max_values=1, options=options)
+        super().__init__(placeholder="Techno", min_values=1,max_values=1, options=options)
 
     async def callback(self, interaction:discord.Interaction):
-        if self.values[0] == "Opcion 1":
-            await interaction.response.send_message("en efecto opcion 1", delete_after=120)
+        if self.values[0] == "Hard Techno":
+            await interaction.response.send_message("seleccionaste hardtechno", delete_after=120)
+            
 
-        elif self.values[0] == "Opcion 2":
-            await interaction.response.send_message("ya te la sabanas opcion 2", delete_after=120)
+        elif self.values[0] == "Acid Techno":
+            await interaction.response.send_message("seleccionaste acid techno", delete_after=120)
 
-        elif self.values[0] == "Opcion 3":
-            await interaction.response.send_message("en efecto, otro bongazo", delete_after=120)
+        elif self.values[0] == "Melodic Techno":
+            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
+
+        elif self.values[0] == "Early Techno":
+            Play_genero_musical(interaction, 3)
+
+
+class MenuRap(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(
+                label="C-kan"
+                
+            ),
+            discord.SelectOption(
+                label="Cancerbero"
+                
+            ),
+            discord.SelectOption(
+                label="Cartel de santa"
+                
+            )
+        ]
+
+        super().__init__(placeholder="Rap", min_values=1,max_values=1, options=options)
+
+    async def callback(self, interaction:discord.Interaction):
+        if self.values[0] == "C-kan":
+            await interaction.response.send_message("reproduciendo: C kan", delete_after=20)
+
+        elif self.values[0] == "Cancerbero":
+            await interaction.response.send_message("reproduciendo: Cancerbero", delete_after=20)
+
+        elif self.values[0] == "Cartel de santa":
+            await interaction.response.send_message("reproduciendo: Cartel de santa", delete_after=20)
         
 
+class MenuGeneros(discord.ui.Select):
+    def __init__(self):
+        options = [
+            #aqui se deberia llenar con la informacion de los json, se deberia extraer de ellos el genero de cada playlist
+            discord.SelectOption(
+                label="Electronica"
+                #description="Hard Techno"
+            ),
+            discord.SelectOption(
+                label="Rap",
+                
+            ),
+            discord.SelectOption(
+                label="Trap",
+                
+            ),
+            discord.SelectOption(
+                label="Metal"
+                
+            ),
+            discord.SelectOption(
+                label="Pop"
+                
+            ),
+            discord.SelectOption(
+                label="Urbano"
+                
+            )
+        ]
 
-class MenuView(discord.ui.View):
+        super().__init__(placeholder="Generos Musicales", min_values=1,max_values=1, options=options)
+
+    async def callback(self, interaction:discord.Interaction):
+        if self.values[0] == "Electronica":
+            #await interaction.response.send_message("seleccionaste hardtechno", delete_after=120)
+            embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
+            embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
+            embed.add_field(name="Selecciona el subgenero", value="")
+            await interaction.response.edit_message(embed=embed, view=MenuElectronica())
+            
+
+        elif self.values[0] == "Rap":
+            await interaction.response.send_message("seleccionaste acid techno", delete_after=120)
+
+        elif self.values[0] == "Trap":
+            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
+
+        elif self.values[0] == "Metal":
+            Play_genero_musical(interaction, 3)
+
+        elif self.values[0] == "Pop":
+            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
+
+        elif self.values[0] == "Urbano":
+            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
+
+
+class MenuElectronica(discord.ui.View):
     def __init__(self):
         super().__init__()
-        self.add_item(Menu())
+        self.add_item(MenuTechno())
+
+
+class ViewGeneros(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(MenuGeneros())
 
 #funciones
 
@@ -622,10 +730,10 @@ async def Play_genero_musical(interaction, genero: int):
     }
 
     generos_musicales = [
-        "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-",#techno
-        "rock",
-        "metal",
-        "rap",
+        "hardtechno",
+        "acidtechno",
+        "melodictechno",
+        "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-",#earlytechno
         "banda",
         "pop"
     ]
