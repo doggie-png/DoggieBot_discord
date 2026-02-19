@@ -1,2 +1,14 @@
+#python cache
+__pycache__/
+*pyc
+*pyo
+*pyd
+
+# Entorno virtual
 .env
+
+#vscode
+.vscode/
+
+#ffmpeg
 bin/ffmpeg/

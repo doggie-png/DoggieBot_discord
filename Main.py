@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands
 from collections import deque
-
+from ui.rocola.view_rocola import ModeView
 
 
 class CLient(commands.Bot):
@@ -257,7 +257,7 @@ async def Rocola(interaction: discord.Interaction):
     embed.add_field(name="Platlist:", value="Reproduce canciones de ese genero.")
     embed.add_field(name="Dj-set:", value="Reproduce un set de algun dj del genero que tu quieras")
     #embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minutos")
-    await interaction.response.send_message(embed=embed, view=BotonesModoRocola(), delete_after= 60) #view=View() es de los botones de los generos para el modo playlist  delete_after= 60
+    await interaction.response.send_message(embed=embed, view=ModeView(), delete_after= 60) #view=View() es de los botones de los generos para el modo playlist  delete_after= 60  view=BotonesModoRocola()
     
 
 #AgregaAPlaylist
@@ -351,15 +351,6 @@ async def AddToAllSongs(interaction: discord.Interaction, nombre: str ,host: str
     embed.add_field(name ="Se arego correctamente la cancion", value=nombre, inline = False)
     await interaction.response.send_message(embed=embed,delete_after=60)
 
-
-#DroDown menu
-@client.tree.command(name="display-dropdown-menu", description="Soy una prueba",guild=GUILD_ID)
-async def dropdownMenu(interaction: discord.Interaction):
-    embed = discord.Embed(title="DropDown Menu", color = discord.Color.red())
-    embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-    embed.add_field(name ="Prueba de dropdown menu", value="selecciona una opcion", inline = False)
-    embed.set_footer(text="Selecciona rapido xq me desaparezco en 1 minuto o menos")
-    await interaction.response.send_message(embed=embed, delete_after = 30)
 
 
 #Eliminar mensajes
@@ -460,93 +451,8 @@ class ViewPlaying(discord.ui.View):
     #async def button_Back(self, button,interaction):
         #await button.response.send_message("se comenzo la reproduccion xd")
 
-#vista de botones para la rocola
-class View(discord.ui.View):
-    
-    #botones
-    @discord.ui.button(label="Techno", style=discord.ButtonStyle.red)
-    async def button_Techno(self,interaction: discord.Interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await Play_genero_musical(interaction, 0)
-
-    @discord.ui.button(label="Rap", style=discord.ButtonStyle.red)
-    async def button_Rap(self,interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await Play_genero_musical(interaction, 1)
-
-    @discord.ui.button(label="Rock", style=discord.ButtonStyle.red)
-    async def button_Rock(self,interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await Play_genero_musical(interaction, 2)
-
-    @discord.ui.button(label="Metal", style=discord.ButtonStyle.red)
-    async def button_Metal(self,interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await Play_genero_musical(interaction, 3)
-
-    @discord.ui.button(label="Pop", style=discord.ButtonStyle.red)
-    async def button_Pop(self,interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await Play_genero_musical(interaction, 4)
-
-
-#vista libre para usar
-class BotonesModoRocola(discord.ui.View):
-    @discord.ui.button(label="Playlist", style=discord.ButtonStyle.red)
-    async def button_Playlist(self, button,interaction):
-        
-        embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
-        embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-        embed.add_field(name="Selecciona un Genero", value="")
-        await button.response.send_message(embed=embed ,view=ViewGeneros())
-
-
-    @discord.ui.button(label="DJ-SET", style=discord.ButtonStyle.red)
-    async def button_DJSet(self, button,interaction):
-        await button.response.send_message("se comenzo la reproduccion xd")
-
-
-#VISTAS PARA DROPDOWN MENU
 
 #MAQUETA DE VISTA DROP DOWN MENU
-class MenuTechno(discord.ui.Select):
-    def __init__(self):
-        options = [
-            #aqui se deberia llenar con la informacion de los json, se deberia extraer de ellos el genero de cada playlist
-            discord.SelectOption(
-                label="Hard Techno"
-                #description="Hard Techno"
-            ),
-            discord.SelectOption(
-                label="Acid Techno",
-                
-            ),
-            discord.SelectOption(
-                label="Melodic Techno"
-                
-            ),
-            discord.SelectOption(
-                label="Early Techno"
-                
-            )
-        ]
-
-        super().__init__(placeholder="Techno", min_values=1,max_values=1, options=options)
-
-    async def callback(self, interaction:discord.Interaction):
-        if self.values[0] == "Hard Techno":
-            await interaction.response.send_message("seleccionaste hardtechno", delete_after=120)
-            
-
-        elif self.values[0] == "Acid Techno":
-            await interaction.response.send_message("seleccionaste acid techno", delete_after=120)
-
-        elif self.values[0] == "Melodic Techno":
-            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
-
-        elif self.values[0] == "Early Techno":
-            Play_genero_musical(interaction, 3)
-
 
 class MenuRap(discord.ui.Select):
     def __init__(self):
@@ -577,75 +483,6 @@ class MenuRap(discord.ui.Select):
         elif self.values[0] == "Cartel de santa":
             await interaction.response.send_message("reproduciendo: Cartel de santa", delete_after=20)
         
-
-class MenuGeneros(discord.ui.Select):
-    def __init__(self):
-        options = [
-            #aqui se deberia llenar con la informacion de los json, se deberia extraer de ellos el genero de cada playlist
-            discord.SelectOption(
-                label="Electronica"
-                #description="Hard Techno"
-            ),
-            discord.SelectOption(
-                label="Rap",
-                
-            ),
-            discord.SelectOption(
-                label="Trap",
-                
-            ),
-            discord.SelectOption(
-                label="Metal"
-                
-            ),
-            discord.SelectOption(
-                label="Pop"
-                
-            ),
-            discord.SelectOption(
-                label="Urbano"
-                
-            )
-        ]
-
-        super().__init__(placeholder="Generos Musicales", min_values=1,max_values=1, options=options)
-
-    async def callback(self, interaction:discord.Interaction):
-        if self.values[0] == "Electronica":
-            #await interaction.response.send_message("seleccionaste hardtechno", delete_after=120)
-            embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
-            embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-            embed.add_field(name="Selecciona el subgenero", value="")
-            await interaction.response.edit_message(embed=embed, view=MenuElectronica())
-            
-
-        elif self.values[0] == "Rap":
-            await interaction.response.send_message("seleccionaste acid techno", delete_after=120)
-
-        elif self.values[0] == "Trap":
-            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
-
-        elif self.values[0] == "Metal":
-            Play_genero_musical(interaction, 3)
-
-        elif self.values[0] == "Pop":
-            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
-
-        elif self.values[0] == "Urbano":
-            await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
-
-
-class MenuElectronica(discord.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(MenuTechno())
-
-
-class ViewGeneros(discord.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(MenuGeneros())
-
 #funciones
 
 #funciones para la escritura y lectura de lo json
@@ -699,87 +536,7 @@ def showrules():
     return embed
 
 #reproduccion de rocola
-async def Play_genero_musical(interaction, genero: int):
-    await interaction.response.defer()
-    
-    if interaction.user.voice is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
-        return
-
-    voice_channel = interaction.user.voice.channel
-
-    if voice_channel is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
-        return
-    
-    voice_client = interaction.guild.voice_client
-
-    if voice_client is None:
-        voice_client = await voice_channel.connect()
-    elif voice_channel != voice_client.channel:
-        await voice_client.move_to(voice_channel)
-
-    ydl_options = {
-        "format": "bestaudio[abr<=96]/bestaudio",
-        "noplaylist": False,
-        "ignoreerrors": True,
-        "quiet": True,
-        "playlistend": 25,
-        "youtube_include_dash_manifest": False,
-        "youtube_include_hls_manifest": False,
-    }
-
-    generos_musicales = [
-        "hardtechno",
-        "acidtechno",
-        "melodictechno",
-        "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-",#earlytechno
-        "banda",
-        "pop"
-    ]
-
-    #query = "ytsearch1: " + generos_musicales[genero]
-    entrada = generos_musicales[genero]
-    query = entrada if es_url(entrada) else f"ytsearch1:{entrada}"
-    results = await search_ytdlp_async(query, ydl_options)
-    #tracks = results.get("entries", [])
-    tracks = results
-
-    if tracks is None:
-        await interaction.followup.send("No se encontraron resultados", delete_after=10)
-        return
-    
-    #todo lo que esta aqui abajo se ejecuta solo si se encontro resultados de la busqueda
-    #first_track = tracks[0]
-    guild_id = str(interaction.guild_id)
-    if SONG_QUEUES.get(guild_id) is None:
-        SONG_QUEUES[guild_id] = deque()
-
-    for track in tracks:
-        if track is None:
-            continue
-
-        audio_url = track["url"]
-        title = track.get("title", "Untitled")
-        duration = track.get("duration", 0)
-        thumbnail = track.get("thumbnail")
-        SONG_QUEUES[guild_id].append((audio_url, title, duration,thumbnail))
-
-
-    if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Platlist de: **{generos_musicales[genero]}**", delete_after=20)
-    else:
-        await play_next_song(voice_client, guild_id, interaction.channel, interaction.user.name)
-
-
 #weas de youtube
-
-def es_url(texto):
-    return texto.startswith(("https://"))
-
-async def search_ytdlp_async(query, ydl_opts):
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, lambda: _extract(query, ydl_opts))
 
 async def play_next_song(voice_client, guild_id, channel, socilitado_por): #la comparte la rocola y el modo reproduccion por cancniones
     if SONG_QUEUES[guild_id]:
@@ -817,25 +574,6 @@ async def play_next_song(voice_client, guild_id, channel, socilitado_por): #la c
     else:
         await voice_client.disconnect()
         SONG_QUEUES[guild_id] = deque()
-
-        
-def _extract(query, ydl_opts):
-    tracks = []
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        #return ydl.extract_info(query, download=False)
-
-        info = ydl.extract_info(query, download=False)
-
-        for entry in info['entries']:
-            if entry is None:
-                continue
-
-            if entry.get('url') is None:
-                continue
-
-            tracks.append(entry)
-
-    return tracks
 
     
 #fin weas youtube
