@@ -9,6 +9,7 @@ from discord.ext import commands
 from discord import app_commands
 from collections import deque
 from ui.rocola.view_rocola import ModeView
+from music.PlayMode import playmode
 
 
 class CLient(commands.Bot):
@@ -185,66 +186,7 @@ async def Ruleta(interaction: discord.Interaction, size: int, opciones: str):
 #Reproducir una sola cancion
 @client.tree.command(name="play", description="ingresa el nombre de una cancion", guild=GUILD_ID)
 async def PlaySong(interaction: discord.Interaction, cancion: str):
-    await interaction.response.defer()
-    
-    if interaction.user.voice is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
-        return
-
-    voice_channel = interaction.user.voice.channel
-
-    if voice_channel is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
-        return
-    
-    voice_client = interaction.guild.voice_client
-
-    if voice_client is None:
-        voice_client = await voice_channel.connect()
-    elif voice_channel != voice_client.channel:
-        await voice_client.move_to(voice_channel)
-
-    ydl_options = {
-        "format": "bestaudio[abr<=96]/bestaudio",
-        "noplaylist": True, #cambiar a false para permitir play list, en el caso de la rocola aqui es donde se marca la diferencia
-        "youtube_include_dash_manifest": False,
-        "youtube_include_hls_manifest": False,
-    }
-
-    #query = "ytsearch1: " + cancion
-    entrada = cancion
-    #query = entrada if es_url(entrada) else f"ytsearch1:{entrada}"
-    if entrada.startswith(("https://")):
-        query = entrada
-    else:
-        query = "ytsearch1: " + entrada
-    results = await search_ytdlp_async(query, ydl_options)
-    tracks = results.get("entries", [])
-
-    if tracks is None:
-        await interaction.followup.send("No se encontraron resultados", delete_after=10)
-        return
-    
-    first_track = tracks[0] if tracks else results
-    
-    #todo lo que esta aqui abajo se ejecuta solo si se encontro resultados de la busqueda
-
-    #first_track = tracks[0]
-    audio_url = first_track["url"]
-    title = first_track.get("title", "Untitled")
-    duration = first_track.get("duration", 0)
-    thumbnail = first_track.get("thumbnail")
-
-    guild_id = str(interaction.guild_id)
-    if SONG_QUEUES.get(guild_id) is None:
-        SONG_QUEUES[guild_id] = deque()
-
-    SONG_QUEUES[guild_id].append((audio_url, title, duration,thumbnail))
-
-    if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Added to queue: **{title}**", delete_after=20)
-    else:
-        await play_next_song(voice_client, guild_id, interaction.channel, interaction.user.name)
+    await playmode(interaction, cancion)
             
 
 
@@ -386,72 +328,6 @@ class ViewQuierePorro(discord.ui.View):
         embed.set_author(name= "Disfruta tu estadia aqui")
         await button.response.send_message(embed=embed,delete_after=120)
 
-#vista botones de reproduccion
-class ViewPlaying(discord.ui.View):
-    @discord.ui.button(label="Play", style=discord.ButtonStyle.red)
-    async def button_Play(self,interaction:discord.Interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        voice_client = interaction.guild.voice_client
-
-        if voice_client is None:
-            return await interaction.response.send_message("joven, acaso me ve aca en un canal de voz?", delete_after=10)
-    
-        if not voice_client.is_paused():
-            return await interaction.response.send_message("no hay nada en pausa", delete_after=10)
-    
-        voice_client.resume()
-        await interaction.response.send_message("cancion sonando de nuevo!!", delete_after=10)
-
-    @discord.ui.button(label="Pause", style=discord.ButtonStyle.red)
-    async def button_Pause(self,interaction: discord.Interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        voice_client = interaction.guild.voice_client
-        if voice_client is None:
-            return await interaction.response.send_message("joven, acaso me ve aca en un canal de voz?", delete_after=10)
-    
-        if not voice_client.is_playing():
-            return await interaction.response.send_message("acaso escuchas algo sonando para pausarlo?", delete_after=10)
-    
-        voice_client.pause()
-        await interaction.response.send_message("cancion pausada", delete_after=10)
-        
-
-    @discord.ui.button(label="Stop", style=discord.ButtonStyle.red)
-    async def button_Stop(self,interaction: discord.Interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        await interaction.response.defer()
-        voice_client = interaction.guild.voice_client
-
-        if not voice_client or not voice_client.is_connected():
-            await interaction.followup.send("me vez en un canal de voz?", delete_after=10)
-            return 
-    
-
-        guild_id_str = str(interaction.guild_id)
-        if guild_id_str in SONG_QUEUES: 
-            SONG_QUEUES[guild_id_str].clear()
-
-        if voice_client.is_playing() or voice_client.is_paused():
-            voice_client.stop()
-    
-        await interaction.response.send_message("dejo de reprodicir canciones y me voy, que lastima pero adios", delete_after=10)
-
-        await voice_client.disconnect()
-
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.red)
-    async def button_Next(self,interaction: discord.Interaction, button):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-        if interaction.guild.voice_client and (interaction.guild.voice_client.is_playing() or interaction.guild.voice_client.is_paused()):
-            interaction.guild.voice_client.stop()
-            await interaction.response.send_message("Siguiente cancion", delete_after=10)
-        else:
-            await interaction.response.send_message("no hay nada sonando para saltar de cancnion", delete_after=10)
-
-    #@discord.ui.button(label="Back", style=discord.ButtonStyle.red)
-    #async def button_Back(self, button,interaction):
-        #await button.response.send_message("se comenzo la reproduccion xd")
-
-
 #MAQUETA DE VISTA DROP DOWN MENU
 
 class MenuRap(discord.ui.Select):
@@ -535,48 +411,6 @@ def showrules():
     embed.set_author(name= "Doggiewrither")
     return embed
 
-#reproduccion de rocola
-#weas de youtube
-
-async def play_next_song(voice_client, guild_id, channel, socilitado_por): #la comparte la rocola y el modo reproduccion por cancniones
-    if SONG_QUEUES[guild_id]:
-        audio_url, title, duration,thumbnail = SONG_QUEUES[guild_id].popleft()
-        mins, secs = divmod(duration, 60)
-        duration_str = f"{mins}:{secs:02}"
-        ffmpeg_options = {
-            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            "options": "-vn -c:a libopus -b:a 96k"
-        }
-        source = discord.FFmpegOpusAudio(audio_url, executable= "bin\\ffmpeg\\ffmpeg.exe", **ffmpeg_options)
-
-        def after_play(error):
-            if error:
-                print(f"Error playing {title}: {error}")
-            asyncio.run_coroutine_threadsafe(play_next_song(voice_client,guild_id, channel, socilitado_por), client.loop)
-
-        ##embed palying##
-        embed_playing = discord.Embed(title="Reproduciendo", color = discord.Color.red())
-        if thumbnail:
-            embed_playing.set_thumbnail(url=thumbnail)
-        else:
-            embed_playing.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")            
-        embed_playing.add_field(name =title, value="De Youtube", inline = False)
-        embed_playing.add_field(name="Duracion", value= duration_str, inline=True)
-        embed_playing.add_field(name="Numero", value="2", inline=True)
-        embed_playing.add_field(name="Volumen", value="100%", inline=True)
-        embed_playing.add_field(name ="Solicitado por: ", value= socilitado_por, inline = False)
-        embed_playing.set_author(name= socilitado_por)
-        ##embed playing##
-
-        voice_client.play(source, after=after_play)
-        asyncio.create_task(channel.send(embed=embed_playing, view= ViewPlaying(), delete_after=duration))
-
-    else:
-        await voice_client.disconnect()
-        SONG_QUEUES[guild_id] = deque()
-
-    
-#fin weas youtube
 
 load_dotenv()
 client.run(os.getenv("token"))

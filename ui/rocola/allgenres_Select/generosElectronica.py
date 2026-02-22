@@ -37,5 +37,6 @@ class MenuTechno(discord.ui.Select):
             await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)
 
         elif self.values[0] == "Early Techno":
-            await Play_genero_musical(interaction, 3)
+            url = "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-"
+            await Play_genero_musical(interaction, url)
             #await interaction.response.send_message("los modulos funcionan peor no hay acceso a reproducir musica", delete_after=20)

@@ -1,5 +1,5 @@
 import discord
-from ui.rocola.allgenres_Select.view_genero import MenuElectronica
+from ui.rocola.allgenres_Select.view_genero import MenuElectronica, ViewMenuRap
 
 class MenuGeneros(discord.ui.Select):
     def __init__(self):
@@ -34,16 +34,16 @@ class MenuGeneros(discord.ui.Select):
         super().__init__(placeholder="Generos Musicales", min_values=1,max_values=1, options=options)
 
     async def callback(self, interaction:discord.Interaction):
+        embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
+        embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
+        embed.add_field(name="Selecciona el artista o subgenero", value="")
         if self.values[0] == "Electronica":
             #await interaction.response.send_message("seleccionaste hardtechno", delete_after=120)
-            embed = discord.Embed(title="Modo Playlist", color = discord.Color.red())
-            embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-            embed.add_field(name="Selecciona el subgenero", value="")
             await interaction.response.edit_message(embed=embed, view=MenuElectronica(), delete_after=180)
             
 
         elif self.values[0] == "Rap":
-            await interaction.response.send_message("seleccionaste acid techno", delete_after=120)
+            await interaction.response.edit_message(embed=embed, view=ViewMenuRap(), delete_after=180)
 
         elif self.values[0] == "Trap":
             await interaction.response.send_message("seleccionaste melodic techno", delete_after=120)

@@ -3,7 +3,7 @@ from collections import deque
 from music.function import es_url, search_ytdlp_async, play_next_song
 from music.state import get_queue
 
-async def Play_genero_musical(interaction, genero: int):
+async def Play_genero_musical(interaction, url: str):
     await interaction.response.defer()
 
     if interaction.user.voice is None:
@@ -43,7 +43,8 @@ async def Play_genero_musical(interaction, genero: int):
     ]
 
     #query = "ytsearch1: " + generos_musicales[genero]
-    entrada = generos_musicales[genero]
+    #entrada = generos_musicales[genero]
+    entrada = url
     query = entrada if es_url(entrada) else f"ytsearch1:{entrada}"
     results = await search_ytdlp_async(query, ydl_options)
     #tracks = results.get("entries", [])
@@ -61,6 +62,7 @@ async def Play_genero_musical(interaction, genero: int):
     #if SONG_QUEUES.get(guild_id) is None: #.get(guild_id)
         #SONG_QUEUES[guild_id] = deque()
 
+    number = 0
     for track in tracks:
         if track is None:
             continue
@@ -69,10 +71,12 @@ async def Play_genero_musical(interaction, genero: int):
         title = track.get("title", "Untitled")
         duration = track.get("duration", 0)
         thumbnail = track.get("thumbnail")
-        SONG_QUEUES.append((audio_url, title, duration,thumbnail))
+        number +=1
+        SONG_QUEUES.append((audio_url, title, duration,thumbnail, number))
+        
 
 
     if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Platlist de: **{generos_musicales[genero]}**", delete_after=20)
+        await interaction.followup.send(f"Platlist agregada correctamente**", delete_after=20)
     else:
         await play_next_song(voice_client, guild_id, interaction.channel, interaction.user.name)

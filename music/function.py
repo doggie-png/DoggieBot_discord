@@ -3,6 +3,7 @@ import yt_dlp
 import asyncio
 from collections import deque
 from music.state import get_queue
+from music.viewPlayButtons import ControllButtons
 
 
 
@@ -17,7 +18,7 @@ async def play_next_song(voice_client, guild_id, channel, socilitado_por): #la c
     SONG_QUEUES = get_queue(guild_id)
     bot = voice_client.client
     if SONG_QUEUES:
-        audio_url, title, duration,thumbnail = SONG_QUEUES.popleft()
+        audio_url, title, duration,thumbnail, number = SONG_QUEUES.popleft()
         mins, secs = divmod(duration, 60)
         duration_str = f"{mins}:{secs:02}"
         ffmpeg_options = {
@@ -39,14 +40,14 @@ async def play_next_song(voice_client, guild_id, channel, socilitado_por): #la c
             embed_playing.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")            
         embed_playing.add_field(name =title, value="De Youtube", inline = False)
         embed_playing.add_field(name="Duracion", value= duration_str, inline=True)
-        embed_playing.add_field(name="Numero", value="2", inline=True)
+        embed_playing.add_field(name="Numero", value=number, inline=True)
         embed_playing.add_field(name="Volumen", value="100%", inline=True)
         embed_playing.add_field(name ="Solicitado por: ", value= socilitado_por, inline = False)
         embed_playing.set_author(name= socilitado_por)
         ##embed playing##
 
         voice_client.play(source, after=after_play)
-        asyncio.create_task(channel.send(embed=embed_playing, delete_after=duration))
+        asyncio.create_task(channel.send(embed=embed_playing, view=ControllButtons() ,delete_after=duration))
 
     else:
         await voice_client.disconnect()
