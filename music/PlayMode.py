@@ -37,8 +37,10 @@ async def playmode(interaction, cancion):
         query = entrada
     else:
         query = "ytsearch1: " + entrada
+
     results = await search_ytdlp_async(query, ydl_options)
-    tracks = results.get("entries", [])
+    #tracks = results.get("entries", [])
+    tracks = results
 
     if tracks is None:
         await interaction.followup.send("No se encontraron resultados", delete_after=10)
@@ -53,6 +55,7 @@ async def playmode(interaction, cancion):
     title = first_track.get("title", "Untitled")
     duration = first_track.get("duration", 0)
     thumbnail = first_track.get("thumbnail")
+    number = 1
 
     guild_id = str(interaction.guild_id)
     SONG_QUEUES = get_queue(guild_id)
@@ -60,9 +63,9 @@ async def playmode(interaction, cancion):
     #if SONG_QUEUES.get(guild_id) is None:
         #SONG_QUEUES[guild_id] = deque()
 
-    SONG_QUEUES.append((audio_url, title, duration,thumbnail))
+    SONG_QUEUES.append((audio_url, title, duration,thumbnail,number))
 
     if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Added to queue: **{title}**", delete_after=20)
+        await interaction.followup.send(f"Added to queue: **{title}**")
     else:
         await play_next_song(voice_client, guild_id, interaction.channel, interaction.user.name)

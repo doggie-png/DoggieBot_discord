@@ -67,6 +67,6 @@ class Stop(discord.ui.Button):
         if voice_client.is_playing() or voice_client.is_paused():
             voice_client.stop()
     
-        await interaction.response.send_message("dejo de reprodicir canciones y me voy, que lastima pero adios", delete_after=10)
+        #await interaction.response.send_message("dejo de reprodicir canciones y me voy, que lastima pero adios", delete_after=10)
 
         await voice_client.disconnect()

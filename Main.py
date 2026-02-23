@@ -10,7 +10,8 @@ from discord import app_commands
 from collections import deque
 from ui.rocola.view_rocola import ModeView
 from music.PlayMode import playmode
-
+from utils.controlls_Json.lectura import cargar_links_DjSet, cargar_linksPlaylist, cargar_all_songs
+from utils.controlls_Json.escritura import guardar_links_DjSets, guardar_linksPlaylist, guardar_all_songs
 
 class CLient(commands.Bot):
     async def on_ready(self):
@@ -42,7 +43,7 @@ class CLient(commands.Bot):
 
         #ver los live sets
         if message.content == "!linksSets":
-            data = cargar_links()
+            data = cargar_links_DjSet()
 
             if not data["links"]:
                 embed = discord.Embed(title= "Live Sets", description="No hay links guardados, pero toma un cogollo y agrega unos.", color = discord.Color.red())
@@ -77,18 +78,6 @@ class CLient(commands.Bot):
                 await message.channel.send(f"Links guardados:\n{texto}")
 
 
-    
-
-    #cuando el bot se une y deja el server
-    async def on_guild_join(guild):
-        await guild.owner.send(f'Hello {guild.owner.name}, eh llegado a tu server: **{guild.name}**, para mas info contacta a mi creador: DoggieWrither.')
-
-    async def on_guild_remove(guild):
-        await guild.owner.send(f'Hello {guild.owner.name}, eh dejado tu server: **{guild.name}**, El universo me llama a otros lugares, espero nos volvamos a ver.')
-
-    
-
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -108,10 +97,19 @@ JSON_ALLSONGSPLAYLIST = "AllSongsPLaylist.json"
 
 
 #reproduccion de muscia del bot
-SONG_QUEUES = {}
+#SONG_QUEUES = {}
 
 
 #Eventos
+
+#cuando el bot se une y deja el server
+@client.event
+async def on_guild_join(guild):
+    await guild.owner.send(f'Hello {guild.owner.name}, eh llegado a tu server: **{guild.name}**, para mas info contacta a mi creador: DoggieWrither.')
+
+async def on_guild_remove(guild):
+    await guild.owner.send(f'Hello {guild.owner.name}, eh dejado tu server: **{guild.name}**, El universo me llama a otros lugares, espero nos volvamos a ver.')
+
 #Gestion de miembros
 @client.event
 async def on_member_join(member):
@@ -187,7 +185,6 @@ async def Ruleta(interaction: discord.Interaction, size: int, opciones: str):
 @client.tree.command(name="play", description="ingresa el nombre de una cancion", guild=GUILD_ID)
 async def PlaySong(interaction: discord.Interaction, cancion: str):
     await playmode(interaction, cancion)
-            
 
 
 #Rocola con diferentes generos musicales
@@ -232,7 +229,7 @@ async def AddToPlaylist(interaction: discord.Interaction, name: str ,link: str):
 
 #AgregaALiveSet
 @client.tree.command(name="agrega-a-live-set", description="Arega un live-set a la playlist, puedes consultar la lista en el canal de live set",guild=GUILD_ID)
-async def AddToLiveSet(interaction: discord.Interaction, genero: str ,link: str):
+async def AddToLiveSet(interaction: discord.Interaction,nombre:str, genero: str ,link: str):
 
     if not link.startswith("http"):
         embed = discord.Embed(title="LiveSets", color = discord.Color.red())
@@ -241,24 +238,19 @@ async def AddToLiveSet(interaction: discord.Interaction, genero: str ,link: str)
         await interaction.response.send_message(embed=embed,delete_after=60)
         return
 
-    data = cargar_links()
-
-    if link in data["links"]:
-        
+    if guardar_links_DjSets(nombre, genero, link):
+        embed = discord.Embed(title="LiveSets", color = discord.Color.red())
+        embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
+        embed.add_field(name ="Se arego correctamente el live set:", value=nombre, inline = False)
+        embed.add_field(name ="Se arego correctamente el live set al genero", value=genero, inline = False)
+        await interaction.response.send_message(embed=embed,delete_after=60)
+    else:
         embed = discord.Embed(title="LiveSets", color = discord.Color.red())
         embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
         embed.add_field(name ="Joven, el enlace ya existe en la lista", value="El enlace ya existe en el genero especificado o ya fue agregado a otro genero xd xd xd soy un bot we yo que se", inline = False)
-        await interaction.response.send_message(embed=embed,delete_after=60)
-        return
+        await interaction.response.send_message(embed=embed,delete_after=30)
 
-    data["links"].append(link)
-    data["genero"].append(genero)
-    guardar_links(data)
-    #cuando se haya agregado correctamente
-    embed = discord.Embed(title="LiveSets", color = discord.Color.red())
-    embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-    embed.add_field(name ="Se arego correctamente el live set al genero", value=genero, inline = False)
-    await interaction.response.send_message(embed=embed,delete_after=60)
+    
 
 #agrega a all songs
 @client.tree.command(name="agrega-a-songs", description="Arega una cancion a una playlist donde hay varias canciones",guild=GUILD_ID)
@@ -311,7 +303,6 @@ async def limpiar_mensajes_bots(interaction: discord.Interaction, limite: int):
 
 
 #VISTAS DE BOTONES
-
 #vista botones para mensaje de bienvenida
 class ViewQuierePorro(discord.ui.View):
     @discord.ui.button(label="SIIIII", style=discord.ButtonStyle.red)
@@ -327,78 +318,6 @@ class ViewQuierePorro(discord.ui.View):
         embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=nnYQNoQSxszk&format=png&color=000000")
         embed.set_author(name= "Disfruta tu estadia aqui")
         await button.response.send_message(embed=embed,delete_after=120)
-
-#MAQUETA DE VISTA DROP DOWN MENU
-
-class MenuRap(discord.ui.Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(
-                label="C-kan"
-                
-            ),
-            discord.SelectOption(
-                label="Cancerbero"
-                
-            ),
-            discord.SelectOption(
-                label="Cartel de santa"
-                
-            )
-        ]
-
-        super().__init__(placeholder="Rap", min_values=1,max_values=1, options=options)
-
-    async def callback(self, interaction:discord.Interaction):
-        if self.values[0] == "C-kan":
-            await interaction.response.send_message("reproduciendo: C kan", delete_after=20)
-
-        elif self.values[0] == "Cancerbero":
-            await interaction.response.send_message("reproduciendo: Cancerbero", delete_after=20)
-
-        elif self.values[0] == "Cartel de santa":
-            await interaction.response.send_message("reproduciendo: Cartel de santa", delete_after=20)
-        
-#funciones
-
-#funciones para la escritura y lectura de lo json
-#gestion de Live Sets
-def cargar_links(): #seria solo para live sets
-    if not os.path.exists(JSON_LIVESETS):
-        return {"genero":[],"links": []}
-
-    with open(JSON_LIVESETS, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def guardar_links(data): #seria solo para live sets
-    with open(JSON_LIVESETS, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
-
-#gestion de playlist
-def cargar_linksPlaylist(): #seria solo para playlist
-    if not os.path.exists(JSON_PLAYLIST):
-        return {"nombre":[],"links": []}
-
-    with open(JSON_PLAYLIST, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def guardar_linksPlaylist(data): #seria solo para playlist
-    with open(JSON_PLAYLIST, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
-#gestion de playlist
-def cargar_all_songs(): #seria solo para all songs
-    if not os.path.exists(JSON_ALLSONGSPLAYLIST):
-        return {"nombre":[],"host":[],"links": []}
-
-    with open(JSON_ALLSONGSPLAYLIST, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def guardar_all_songs(data): #seria solo para all songs
-    with open(JSON_ALLSONGSPLAYLIST, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
 
 #funcion para imprimir las reglas
 def showrules():
