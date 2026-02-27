@@ -7,8 +7,3 @@ class GeneroDjSet(discord.ui.View): #esta wea sera general para mostrar segun lo
         super().__init__()
         self.genero = genero
         self.add_item(GeneroSets(genero)) #select sera universal par lo comentado arriba xd xd
-
-#class ViewMenuRap(discord.ui.View):
- #   def __init__(self):
-  #      super().__init__()
-   #     self.add_item(MenuRap())

@@ -1,8 +1,27 @@
-{
-    "nombre": [
-        "Eearly 2000s techno bangers"
-    ],
-    "links": [
-        "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-"
-    ]
-}
+[
+    {
+        "nombre": "Eearly 2000s techno bangers",
+        "genero": "techno",
+        "links": "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-"
+    },
+    {
+        "nombre": "c kan",
+        "genero": "rap",
+        "links": "https://www.youtube.com/watch?v=A6iJsZoRO64&list=PLn4es56qjv_TOm7C45rJIyELn49chNQoT"
+    },
+    {
+        "nombre": "Cancerbero",
+        "genero": "rap",
+        "links": "https://www.youtube.com/watch?v=sq6oc066w14&list=PLar0gUcrS11jgF-EJKN9wof5xFGMFbMhv"
+    },
+    {
+        "nombre": "Cartel de santa",
+        "genero": "rap",
+        "links": "https://www.youtube.com/watch?v=j_tkv80LkO8&list=PL5IiYWHIq7Bz-IJ-LKR_CSnBH3xALOMbR"
+    },
+    {
+        "nombre": "question mark xxxtentation",
+        "genero": "trap",
+        "links": "https://www.youtube.com/watch?v=0Hq1MRDaniA&list=PLic0Kn45RfnWUROowP-ghQAF7CEBi0t3Z"
+    }
+]

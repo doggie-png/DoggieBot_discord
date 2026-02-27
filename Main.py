@@ -50,7 +50,7 @@ class CLient(commands.Bot):
                 embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=bRzTMAMaPhdJ&format=png&color=000000")
                 await message.channel.send(embed=embed)
             else:
-                #texto = "\n".join(data["links"])
+                
                 embed = discord.Embed(title="Live sets", color =discord.Color.red())
                 for t in data: #deberiamos agregar la wea de que no crashse por cantidad de caracteres xd xd xd pd: si crashea en un futuro en esta linea ya sabes porque fue jajajaj
                     embed.add_field(
@@ -59,26 +59,28 @@ class CLient(commands.Bot):
                         inline= False
                     )
 
-                #mensaje = "\n".join(
-                    #f"**{t['nombre']}**\nGenero: {t['genero']}\n{t['links']}\n"
-                    #for t in data
-                #)
-                
                 await message.channel.send(embed=embed,delete_after=300)
 
         #ver las playlist
         if message.content == "!linksPlaylist":
             data = cargar_linksPlaylist()
 
-            if not data["links"]:
+            if not data:
                 embed = discord.Embed(title= "Playlist", description="No hay links guardados, pero toma un cogollo y agrega unos.", color = discord.Color.red())
                 embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=bRzTMAMaPhdJ&format=png&color=000000")
                 await message.channel.send(embed=embed)
             else:
-                texto = "\n".join(data["links"])
-                await message.channel.send(f"Links guardados:\n{texto}")
+                embed = discord.Embed(title="Live sets", color =discord.Color.red())
+                for t in data:
+                    embed.add_field(
+                        name= t['nombre'],
+                        value=f"Genero: {t['genero']}\n[Link]({t['links']})",
+                        inline= False
+                    )
+                
+                await message.channel.send(embed=embed,delete_after=300)
 
-        #ver las playlist
+        #ver las playlist de todo un poco
         if message.content == "!linksAllSongs":
             data = cargar_all_songs()
 
@@ -214,31 +216,26 @@ async def Rocola(interaction: discord.Interaction):
 
 #AgregaAPlaylist
 @client.tree.command(name="agrega-a-playlist", description="Arega una playlist a una lista que contiene mas playlist xd",guild=GUILD_ID)
-async def AddToPlaylist(interaction: discord.Interaction, name: str ,link: str):
+async def AddToPlaylist(interaction: discord.Interaction, nombre: str, genero: str ,link: str):
 
     if not link.startswith("http"): #permmitir de otras plataformas como spoty y asi
-        embed = discord.Embed(title="Playlists", color = discord.Color.red())
+        embed = discord.Embed(title="Playlist", color = discord.Color.red())
         embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
         embed.add_field(name ="Joven, eso no es un enlace no mame", value="Todo meco el bato queriendo trollear al bot", inline = False)
         await interaction.response.send_message(embed=embed, delete_after=60)
         return
 
-    data = cargar_linksPlaylist()
-
-    if link in data["links"]:
-        embed = discord.Embed(title="Playlists", color = discord.Color.red())
+    if guardar_linksPlaylist(nombre, genero, link):
+        embed = discord.Embed(title="Playlist", color = discord.Color.red())
         embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-        embed.add_field(name ="Joven, el enlace ya existe en la lista", value="El enlace de la playlist ya existe", inline = False)
-        await interaction.response.send_message(embed=embed, delete_after=60)
-        return
-
-    data["links"].append(link)
-    data["nombre"].append(name)
-    guardar_linksPlaylist(data)
-    embed = discord.Embed(title="Playlists", color = discord.Color.red())
-    embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
-    embed.add_field(name ="Se arego correctamente la playlist:", value=name, inline = False)
-    await interaction.response.send_message(embed=embed, delete_after=60)
+        embed.add_field(name ="Se arego correctamente la playlist:", value=nombre, inline = False)
+        embed.add_field(name ="Se arego correctamente la playlist al genero", value=genero, inline = False)
+        await interaction.response.send_message(embed=embed,delete_after=60)
+    else:
+        embed = discord.Embed(title="Playlist", color = discord.Color.red())
+        embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=VfM1DGzeu9I8&format=png&color=000000")
+        embed.add_field(name ="Joven, el enlace ya existe en la lista", value="El enlace ya existe en el genero especificado o ya fue agregado a otro genero xd xd xd soy un bot we yo que se", inline = False)
+        await interaction.response.send_message(embed=embed,delete_after=30)
 
 #AgregaALiveSet
 @client.tree.command(name="agrega-a-live-set", description="Arega un live-set a la playlist, puedes consultar la lista en el canal de live set",guild=GUILD_ID)

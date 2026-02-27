@@ -7,13 +7,13 @@ async def Play_genero_musical(interaction, url: str):
     await interaction.response.defer()
 
     if interaction.user.voice is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
+        await interaction.followup.send("Mame joven, unase a un canal de voz primero")
         return
 
     voice_channel = interaction.user.voice.channel
 
     if voice_channel is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
+        await interaction.followup.send("Mame joven, unase a un canal de voz primero")
         return
     
     voice_client = interaction.guild.voice_client
@@ -33,17 +33,6 @@ async def Play_genero_musical(interaction, url: str):
         "youtube_include_hls_manifest": False,
     }
 
-    generos_musicales = [
-        "hardtechno",
-        "acidtechno",
-        "melodictechno",
-        "https://www.youtube.com/watch?v=84sHTvn6xf8&list=PL8uhM5Q8xUMoj4yoX2hWCbvLKIcm4vBt-",#earlytechno
-        "banda",
-        "pop"
-    ]
-
-    #query = "ytsearch1: " + generos_musicales[genero]
-    #entrada = generos_musicales[genero]
     entrada = url
     query = entrada if es_url(entrada) else f"ytsearch1:{entrada}"
     results = await search_ytdlp_async(query, ydl_options)
@@ -51,7 +40,7 @@ async def Play_genero_musical(interaction, url: str):
     tracks = results
 
     if tracks is None:
-        await interaction.followup.send("No se encontraron resultados", delete_after=10)
+        await interaction.followup.send("No se encontraron resultados")
         return
     
     #todo lo que esta aqui abajo se ejecuta solo si se encontro resultados de la busqueda
@@ -77,6 +66,6 @@ async def Play_genero_musical(interaction, url: str):
 
 
     if voice_client.is_playing() or voice_client.is_paused():
-        await interaction.followup.send(f"Platlist agregada correctamente**", delete_after=20)
+        await interaction.followup.send(f"Platlist agregada correctamente**")
     else:
         await play_next_song(voice_client, guild_id, interaction.channel, interaction.user.name)

@@ -1,13 +1,8 @@
 import discord
-from ui.rocola.allgenres_Select.generosElectronica import MenuTechno
-from ui.rocola.allgenres_Select.generosRap import MenuRap
+from ui.rocola.allgenres_Select.generosElectronica import GeneroPlaylist
 
-class MenuElectronica(discord.ui.View):
+class VIewGeneroPlaylist(discord.ui.View): 
     def __init__(self):
         super().__init__()
-        self.add_item(MenuTechno())
-
-class ViewMenuRap(discord.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(MenuRap())
+        #self.genero = genero
+        self.add_item(GeneroPlaylist())
