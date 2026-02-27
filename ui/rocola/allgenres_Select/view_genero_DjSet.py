@@ -1,11 +1,12 @@
 import discord
-from ui.rocola.allgenres_Select.menu_hardtechno_djset import hardTechno
+from ui.rocola.allgenres_Select.genero_selected_sets import GeneroSets
 #from ui.rocola.allgenres_Select.generosRap import MenuRap
 
-class MenuHardTechno(discord.ui.View):
-    def __init__(self):
+class GeneroDjSet(discord.ui.View): #esta wea sera general para mostrar segun lo seleccionado
+    def __init__(self, genero):
         super().__init__()
-        self.add_item(hardTechno())
+        self.genero = genero
+        self.add_item(GeneroSets(genero)) #select sera universal par lo comentado arriba xd xd
 
 #class ViewMenuRap(discord.ui.View):
  #   def __init__(self):

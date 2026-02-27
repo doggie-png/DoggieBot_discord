@@ -61,13 +61,17 @@ def _extract(query, ydl_opts):
 
         info = ydl.extract_info(query, download=False)
 
-        for entry in info['entries']:
-            if entry is None:
-                continue
+        if 'entries' in info:
+            for entry in info['entries']:
+                if not entry:
+                    continue
 
-            if entry.get('url') is None:
-                continue
+                if entry.get('url') is None:
+                    continue
 
-            tracks.append(entry)
+                tracks.append(entry)
+        else:
+            if info.get('url'):
+                tracks.append(info)
 
     return tracks

@@ -7,13 +7,13 @@ async def playmode(interaction, cancion):
     await interaction.response.defer()
     
     if interaction.user.voice is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
+        await interaction.followup.send("Mame joven, unase a un canal de voz primero")
         return
 
     voice_channel = interaction.user.voice.channel
 
     if voice_channel is None:
-        await interaction.followup.send("Mame joven, unase a un canal de voz primero", delete_after=10)
+        await interaction.followup.send("Mame joven, unase a un canal de voz primero")
         return
     
     voice_client = interaction.guild.voice_client

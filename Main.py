@@ -45,13 +45,26 @@ class CLient(commands.Bot):
         if message.content == "!linksSets":
             data = cargar_links_DjSet()
 
-            if not data["links"]:
+            if not data:
                 embed = discord.Embed(title= "Live Sets", description="No hay links guardados, pero toma un cogollo y agrega unos.", color = discord.Color.red())
                 embed.set_thumbnail(url="https://img.icons8.com/?size=100&id=bRzTMAMaPhdJ&format=png&color=000000")
                 await message.channel.send(embed=embed)
             else:
-                texto = "\n".join(data["links"])
-                await message.channel.send(f"Links guardados:\n{texto}")
+                #texto = "\n".join(data["links"])
+                embed = discord.Embed(title="Live sets", color =discord.Color.red())
+                for t in data: #deberiamos agregar la wea de que no crashse por cantidad de caracteres xd xd xd pd: si crashea en un futuro en esta linea ya sabes porque fue jajajaj
+                    embed.add_field(
+                        name= t['nombre'],
+                        value=f"Genero: {t['genero']}\n[Link]({t['links']})",
+                        inline= False
+                    )
+
+                #mensaje = "\n".join(
+                    #f"**{t['nombre']}**\nGenero: {t['genero']}\n{t['links']}\n"
+                    #for t in data
+                #)
+                
+                await message.channel.send(embed=embed,delete_after=300)
 
         #ver las playlist
         if message.content == "!linksPlaylist":
@@ -274,7 +287,7 @@ async def AddToAllSongs(interaction: discord.Interaction, nombre: str ,host: str
         return
 
     data["nombre"].append(nombre)
-    data["host"].append(host)
+    data["host"].append(host) #hacerlo igual que live set
     data["links"].append(link)
     
     
